@@ -1,0 +1,27 @@
+{
+  "name": "cloud-torrent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^12.0.7",
+    "castv2-client": "^1.2.0",
+    "chalk": "^2.4.2",
+    "chromecast-api": "^0.2.5",
+    "directory-tree": "^2.2.3",
+    "fluent-ffmpeg": "^2.1.2",
+    "fs-extra": "^8.0.1",
+    "handbrake-js": "^3.0.8",
+    "js-yaml": "^3.13.1",
+    "rimraf": "^2.6.3",
+    "ts-node": "^8.2.0",
+    "typescript": "^3.5.1",
+    "yamljs": "^0.3.0"
+  }
+}
