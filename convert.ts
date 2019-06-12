@@ -8,6 +8,7 @@ import { getShowsInfo } from './info';
 const deleteAfter = true
 
 
+// TODO Batch Process
 
 let mainConfig
 

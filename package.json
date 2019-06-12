@@ -15,6 +15,7 @@
     "chalk": "^2.4.2",
     "chromecast-api": "^0.2.5",
     "directory-tree": "^2.2.3",
+    "express": "^4.17.1",
     "fluent-ffmpeg": "^2.1.2",
     "fs-extra": "^8.0.1",
     "handbrake-js": "^3.0.8",
