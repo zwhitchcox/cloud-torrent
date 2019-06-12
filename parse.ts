@@ -2,26 +2,50 @@ import chalk from 'chalk'
 import ffmpeg from 'fluent-ffmpeg'
 import path from 'path'
 import rimraf from 'rimraf'
-import { getShowsInfo } from './config';
+import { getShowsInfo, getMainConfig, saveMainConfig } from './config';
+import { existsSync } from 'fs-extra';
 const deleteAfter = true
 
 
-const episodes: any = []
+
+let mainConfig
+
 ;(async () => {
-  const info = await getShowsInfo()
-  console.log(info)
-  // for (const episode of episodes) {
-  //   const input = episode.path
-  //   if (/(mp4|webm)/.test(input)) continue
-  //   const output = path.dirname(input) + "/" + path.basename(input).replace(/mkv$/, 'mp4')
-  //   if (existsSync(output)) continue
-  //   await convertFileInPlace(input, output)
-  //   if (deleteAfter) {
-  //     console.log(chalk.red(`Deleting ${input}`))
-  //     deleteMKV(episode)
-  //   }
-  // }
+  mainConfig = await getMainConfig()
+  if (mainConfig.processing) {
+    await deleteFile(mainConfig.processing)
+    await setProcessingFile(null)
+  }
+  const {sources} = mainConfig
+  const shows = await getShowsInfo(sources)
+  for (const show in shows) {
+    const {episodes} = shows[show]
+    await convertEpisodes(episodes)
+  }
 })()
+
+
+async function convertEpisodes(episodes) {
+  for (const episodeName in episodes) {
+    const episode = episodes[episodeName]
+    const input = episode
+    if (/(mp4|webm)$/.test(input)) continue
+    const output = path.dirname(input) + "/" + path.basename(input).replace(/mkv$/, 'mp4')
+    if (existsSync(output)) continue
+    await setProcessingFile(output)
+    await convertFileInPlace(input, output)
+    await setProcessingFile(null)
+    if (deleteAfter) {
+      console.log(chalk.red(`Deleting ${input}`))
+      deleteFile(input)
+    }
+  }
+}
+
+async function setProcessingFile(file) {
+  mainConfig.processing = file
+  await saveMainConfig(mainConfig)
+}
 
 
 
@@ -53,10 +77,6 @@ function deleteMKV(episode) {
     rimraf(episode.path, () => {})
   }
 }
-function deleteWebm(episode) {
-  if (/webm$/.test(episode.path)) {
-    rimraf(episode.path, () => {})
-  }
+function deleteFile(path) {
+  return rimraf(path, () => {})
 }
-
-

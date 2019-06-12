@@ -6,12 +6,11 @@ import os from 'os'
 import yaml from 'js-yaml'
 const CONFIG_FILE_NAME = '.cloud-torrent-config'
 
-export async function getShowsInfo() {
-  const mainConfig:any = await getMainConfig()
-  const {sources} = mainConfig
+export async function getShowsInfo(sources) {
   const showpaths = {}
 
   for (const source of sources) {
+    if (!existsSync(source.path)) continue
     const subdirectories = getSubdirectories(source.path)
     for (const subdirectoryPath of subdirectories) {
       showpaths[path.basename(subdirectoryPath)] = subdirectoryPath
@@ -78,7 +77,7 @@ function getHyphenated(name) {
   return name.split(' ').map(namePart => namePart.toLowerCase()).join('-')
 }
 
-async function getMainConfig() {
+export async function getMainConfig() {
   const mainConfigFilePath = getConfigFilePath(os.homedir())
   const defaultMainConfig = {
     sources: [
@@ -88,6 +87,11 @@ async function getMainConfig() {
     ]
   }
   return readConfigFile(mainConfigFilePath, defaultMainConfig)
+}
+
+export async function saveMainConfig(config) {
+  const mainConfigFilePath = getConfigFilePath(os.homedir())
+  await writeFile(mainConfigFilePath, yaml.safeDump(config))
 }
 
 async function readConfigFile(configFilePath, alternative) {
