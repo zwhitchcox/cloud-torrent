@@ -18,6 +18,25 @@ export async function getShowsInfo() {
   }
 
   const showsInfo = {}
+  for (const showName in showpaths) {
+    const aliases = getShowAliases(showName)
+    console.log(aliases)
+  }
+}
+
+function getShowAliases(name) {
+  const aliases: string[] = []
+  if (name.split(' ').length > 2) {
+    aliases.push(getAcronym(name))
+  }
+  aliases.push(getHyphenated(name))
+  return aliases
+}
+function getAcronym(name) {
+  return name.split(' ').map(namePart => namePart.charAt(0).toLowerCase()).join('')
+}
+function getHyphenated(name) {
+  return name.split(' ').map(namePart => namePart.toLowerCase()).join('-')
 }
 
 async function getShowInfo(sourcePath, configFileName) {
