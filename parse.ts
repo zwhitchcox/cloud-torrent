@@ -9,6 +9,7 @@ const deleteAfter = true
 const episodes: any = []
 ;(async () => {
   const info = await getShowsInfo()
+  console.log(info)
   // for (const episode of episodes) {
   //   const input = episode.path
   //   if (/(mp4|webm)/.test(input)) continue
