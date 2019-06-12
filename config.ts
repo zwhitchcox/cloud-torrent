@@ -1,4 +1,5 @@
 import { readdirSync, lstatSync } from 'fs';
+import walk from 'walk'
 import { existsSync, readFile, writeFile } from 'fs-extra';
 import path from 'path'
 import os from 'os'
@@ -20,17 +21,51 @@ export async function getShowsInfo() {
   const showsInfo = {}
   for (const showName in showpaths) {
     const aliases = getShowAliases(showName)
-    console.log(aliases)
-    const showInfo = getShowInfo(showpaths[showName])
+    const showInfo = await getShowInfo(showpaths[showName])
+    showsInfo[showName] = showInfo
+    for (const alias of aliases) {
+      showsInfo[alias] = showInfo
+    }
   }
+  return showsInfo
 }
 
 async function getShowInfo(showpath) {
   return {
     path: showpath,
-    config: readConfigFile(showpath, {}),
+    config: readConfigFile(getConfigFilePath(showpath), {}),
+    episodes: await getEpisodes(showpath),
   }
 }
+
+async function getEpisodes(showpath) {
+  const episodePaths = (await getFileList(showpath) as string[])
+    .filter(filePath => /S\d\dE\d\d/i.test(filePath))
+  const episodes = {}
+  for (const episodePath of episodePaths) {
+    const matches = episodePath.match(/s\d\de\d\d/i)
+    if (matches) {
+      const episodeID = matches[0]
+      episodes[episodeID] = episodePath
+    }
+  }
+  return episodes
+}
+
+async function getFileList(showpath) {
+  return new Promise((res, rej) => {
+    const files: string[] = []
+    const walker = walk.walk(showpath, { followLinks: false })
+    walker.on('file', function(root, stat, next) {
+        files.push(root + '/' + stat.name);
+        next()
+    })
+    walker.on('end', function() {
+      res(files);
+    })
+  })
+}
+
 
 function getShowAliases(name) {
   const aliases: string[] = []
