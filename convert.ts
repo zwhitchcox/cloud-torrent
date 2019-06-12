@@ -15,9 +15,10 @@ let mainConfig
 ;(async () => {
   mainConfig = await getMainConfig()
   if (mainConfig.processing) {
-    await deleteFile(mainConfig.processing)
-    await setProcessingFile(null)
+    for (const processingFile of [].concat(mainConfig.processing))
+    await deleteFile(processingFile)
   }
+  await setProcessingFiles(null)
   const {sources} = mainConfig
   const shows = await getShowsInfo(sources)
   for (const show in shows) {
@@ -28,23 +29,37 @@ let mainConfig
 
 
 async function convertEpisodes(episodes) {
+  let toProcess: [string, string][] = []
   for (const episodeName in episodes) {
     const episode = episodes[episodeName]
     const input = episode
     if (/(mp4|webm)$/.test(input)) continue
     const output = path.dirname(input) + "/" + path.basename(input).replace(/mkv$/, 'mp4')
     if (existsSync(output)) continue
-    await setProcessingFile(output)
+    toProcess.push([input, output])
+  }
+  for (let i = 0; i < toProcess.length; i++) {
+    const batch = toProcess.slice(5)
+    // remember which are being processed so you can delete them if it gets interrupted
+    const outputs = batch.map(([input, output]) => output)
+    await setProcessingFiles(outputs)
+    await processBatch(batch)
+    await setProcessingFiles(null)
+  }
+}
+
+async function processBatch(episodes) {
+  return await Promise.all(episodes.map(async ([input, output]) => {
     await convertFileInPlace(input, output)
-    await setProcessingFile(null)
     if (deleteAfter) {
       console.log(chalk.red(`Deleting ${input}`))
       deleteFile(input)
     }
-  }
+  }))
+
 }
 
-async function setProcessingFile(file) {
+async function setProcessingFiles(file) {
   mainConfig.processing = file
   await saveMainConfig(mainConfig)
 }
