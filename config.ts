@@ -21,6 +21,14 @@ export async function getShowsInfo() {
   for (const showName in showpaths) {
     const aliases = getShowAliases(showName)
     console.log(aliases)
+    const showInfo = getShowInfo(showpaths[showName])
+  }
+}
+
+async function getShowInfo(showpath) {
+  return {
+    path: showpath,
+    config: readConfigFile(showpath, {}),
   }
 }
 
@@ -39,36 +47,26 @@ function getHyphenated(name) {
   return name.split(' ').map(namePart => namePart.toLowerCase()).join('-')
 }
 
-async function getShowInfo(sourcePath, configFileName) {
-
-}
 
 async function getMainConfig() {
   const mainConfigFilePath = getConfigFilePath(os.homedir())
-  const mainStartConfig = {
+  const defaultMainConfig = {
     sources: [
       {
         path: __dirname + '/_videos',
       },
     ]
   }
-  return readConfigFile(mainConfigFilePath, mainStartConfig)
+  return readConfigFile(mainConfigFilePath, defaultMainConfig)
 }
 
-async function getSubConfigs(source, CONFIG_FILE_NAME) {
-  const subdirectories = getSubdirectories(source)
-  return subdirectories
-    .filter(subPath => (path.basename(subPath) !== "Movies"))
-    .map(subDirPath => getSubConfig(subDirPath))
-}
+// async function getSubConfigs(source, CONFIG_FILE_NAME) {
+//   const subdirectories = getSubdirectories(source)
+//   return subdirectories
+//     .filter(subPath => (path.basename(subPath) !== "Movies"))
+//     .map(subDirPath => getSubConfig(subDirPath))
+// }
 
-async function getSubConfig(subDirPath) {
-  const configFilePath = getConfigFilePath(subDirPath)
-  return {
-    path: subDirPath,
-    config: readConfigFile(configFilePath, {}),
-  }
-}
 
 async function readConfigFile(configFilePath, alternative) {
   let config
