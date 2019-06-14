@@ -15,18 +15,24 @@ export async function queueEpisodes(addresses, time, onStatus) {
   client.launch(DefaultMediaReceiver, function(err, player) {
     const mediaList = addresses.map((address, i) => ({
         autoplay : true,
-        preloadTime : 1,
+        preloadTime : 2,
         activeTrackIds : [],
-        playbackDuration: 1,
+        playbackDuration: 2,
         media: {
           contentId: address,
-          contentType: "video/mpeg",
+          contentType: "video/mp4",
           streamType: 'BUFFERED'
         }
     }))
     player.on('status', onStatus)
+    let statuscount = 0
     setInterval(() => {
+      if(statuscount>5) {
+        process.exit(0)
+      }
+      statuscount++
       player.getStatus((err, status) => {
+        statuscount--
         onStatus(status)
       })
     }, 3000)

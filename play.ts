@@ -23,23 +23,28 @@ import { queueEpisodes } from './queue-episodes';
   if (!config.lastplayed[showname]) {
     console.log('no last played')
     config.lastplayed[showname] = {
-      episode: 's01e01',
       time: 0,
     }
   }
   await saveMainConfig(config)
+  const lastplayed = config.lastplayed[showname]
   const episodes = Object
     .entries(showinfo.episodes)
     .sort((a, b) => {
       return a[0] > b[0] ? 1 : -1
     })
-  const currentIndex = episodes.findIndex(episode => episode[0] === config.lastplayed[showname].episode)
+  let currentIndex = episodes.findIndex(episode => {
+    return episode[0].toLowerCase() === lastplayed.episode
+  })
+  if (currentIndex < 1) {
+    currentIndex = 0
+  }
   const myip = getIP()
   const next5Episodes = episodes
-    .slice(currentIndex, 5)
+    .slice(currentIndex, currentIndex + 2)
     .map(tuple => tuple[0])
-    .map(episode => `http://${myip}:5000/${showname.toLowerCase().replace(' ', '-')}/${episode.toLowerCase()}.mp4`)
-  const lastplayed = config.lastplayed[showname]
+    .map(episode => `http://${myip}:5000/${showname.toLowerCase().replace(/ /ig, '-')}/${episode.toLowerCase()}.mp4`)
+  console.log(next5Episodes)
   queueEpisodes(next5Episodes, lastplayed.time, async status => {
     const contentId = _.get(status, 'media.contentId')
     let episodeId
@@ -47,12 +52,12 @@ import { queueEpisodes } from './queue-episodes';
       const match = contentId.match(/s\d\de\d\d/i)
       episodeId = match && match[0]
     }
-    console.dir(status)
-    if (status.currentTime && episodeId) {
+    if (status && status.currentTime && episodeId) {
       lastplayed.time = status.currentTime
       lastplayed.episode = episodeId
       console.log(`playing ${episodeId} at ${status.currentTime}`)
       await saveMainConfig(config)
+    } else {
     }
       // console.log(episodeId)
   })
@@ -71,3 +76,7 @@ function getIP() {
     }
   }
 }
+process.on('uncaughtException', (e) => {
+  console.log(e)
+  process.exit(0)
+})

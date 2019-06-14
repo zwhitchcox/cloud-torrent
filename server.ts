@@ -10,12 +10,14 @@ const app = express()
   const config = await getMainConfig()
   const shows = await getShowsInfo(config.sources)
   for (const showname in shows) {
-    const webpath = showname.toLowerCase().replace(' ', '-')
+    const webpath = showname.toLowerCase().replace(/ /g, '-')
     const show = shows[showname]
     for (const episodeNumber in show.episodes) {
-      const episodePath = show.episodes[episodeNumber]
-      const extension = path.extname(episodePath)
-      servePath(app, `/${webpath}/${episodeNumber.toLowerCase()}${extension}`, episodePath)
+      const filePath = show.episodes[episodeNumber]
+      const extension = path.extname(filePath)
+      const episodePath = `/${webpath}/${episodeNumber.toLowerCase()}${extension}`
+      if (/rick/i.test(episodePath)) console.log(episodePath)
+      servePath(app, episodePath, filePath)
     }
   }
   app.listen(5000, () => {

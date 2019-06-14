@@ -1,3 +1,4 @@
+import fs from 'fs'
 import { existsSync, readFile, writeFile } from 'fs-extra';
 import path from 'path'
 import os from 'os'
@@ -19,7 +20,9 @@ export async function getMainConfig() {
 
 export async function saveMainConfig(config) {
   const mainConfigFilePath = getConfigFilePath(os.homedir())
+  const onedriveConfigFilePath = getConfigFilePath(path.join(os.homedir(), 'OneDrive'))
   await writeFile(mainConfigFilePath, yaml.safeDump(config))
+  await copy(mainConfigFilePath, onedriveConfigFilePath)
 }
 
 async function readConfigFile(configFilePath, alternative) {
@@ -36,4 +39,18 @@ async function readConfigFile(configFilePath, alternative) {
 
 function getConfigFilePath(dir) {
   return path.resolve(dir, CONFIG_FILE_NAME)
+}
+
+function copy(original, destination) {
+  return new Promise((res, rej) => {
+    var readStream = fs.createReadStream(original);
+    var writeStream = fs.createWriteStream(destination);
+
+    readStream.on('error', rej);
+    writeStream.on('error', rej);
+
+    readStream.on('close', res);
+
+    readStream.pipe(writeStream);
+  })
 }

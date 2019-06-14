@@ -9,6 +9,7 @@ export async function getShowsInfo(sources) {
     if (!existsSync(source.path)) continue
     const subdirectories = getSubdirectories(source.path)
     for (const subdirectoryPath of subdirectories) {
+      if (path.basename(subdirectoryPath) === 'Movies') continue
       showpaths[path.basename(subdirectoryPath)] = subdirectoryPath
     }
   }
@@ -31,7 +32,7 @@ async function getShowInfo(showpath, showname) {
 
 async function getEpisodes(showpath) {
   const episodePaths = (await getFileList(showpath) as string[])
-    .filter(filePath => /S\d\dE\d\d/i.test(filePath))
+    .filter(filePath => (/S\d\dE\d\d/i.test(filePath) && !/\.srt$/.test(filePath)))
   const episodes = {}
   for (const episodePath of episodePaths) {
     const matches = episodePath.match(/s\d\de\d\d/i)
