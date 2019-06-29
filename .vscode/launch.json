@@ -30,6 +30,21 @@
             "cwd": "${workspaceRoot}",
             "protocol": "inspector",
             "internalConsoleOptions": "openOnSessionStart"
-        }
+        },
+        {
+            "name": "Run Current File",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/${relativeFile}",
+            "env": {
+                "FORCE_COLOR": "1"
+            },
+            "skipFiles": [
+                "<node_internals>/**/*.js",
+            ],
+            "outFiles": [
+                "${workspaceRoot}/dist/**/*.js"
+            ]
+        },
     ]
 }

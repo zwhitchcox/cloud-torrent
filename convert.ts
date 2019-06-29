@@ -54,7 +54,7 @@ async function setProcessingFiles(file) {
 
 function convertFileInPlace(input: string, output: string) {
   return new Promise((res, rej) => {
-    if (/.mp4$/.test(input)) {
+    if (/.mkv$/.test(input)) {
       console.log(chalk.yellow(`Processing ${path.basename(input)}`))
       const tmppath = __dirname + '/.tmp.mp4'
       const timeStart = +new Date

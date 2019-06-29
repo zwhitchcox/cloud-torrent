@@ -3,6 +3,7 @@ import _ from 'lodash'
 import { getMainConfig, saveMainConfig } from "./config";
 import { getShowsInfo } from "./info";
 import { queueEpisodes } from './queue-episodes';
+getIP()
 
 
 ;(async () => {
@@ -41,7 +42,7 @@ import { queueEpisodes } from './queue-episodes';
   }
   const myip = getIP()
   const next5Episodes = episodes
-    .slice(currentIndex, currentIndex + 2)
+    .slice(currentIndex, currentIndex + 5)
     .map(tuple => tuple[0])
     .map(episode => `http://${myip}:5000/${showname.toLowerCase().replace(/ /ig, '-')}/${episode.toLowerCase()}.mp4`)
   console.log(next5Episodes)
@@ -62,12 +63,13 @@ import { queueEpisodes } from './queue-episodes';
       // console.log(episodeId)
   })
 
-})()
+})().catch(console.error)
 
 function getIP() {
   const ifaces = os.networkInterfaces();
   for (const ifname in ifaces) {
-    if (ifname === "Wi-Fi") {
+    if (ifname === "Wi-Fi" || /wlp/.test(ifname)) {
+
       const iface = ifaces[ifname].find(iface => !(iface.family !== 'IPv4' || iface.internal !== false))
       if (!iface) {
         throw new Error("Couldn't find my address")

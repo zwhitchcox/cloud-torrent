@@ -43,7 +43,6 @@ export async function queueEpisodes(addresses, time, onStatus) {
         repeatMode: "REPEAT_OFF"
       },
       () => {
-        player.seek(time)
       }
     )
   })

@@ -20,9 +20,7 @@ export async function getMainConfig() {
 
 export async function saveMainConfig(config) {
   const mainConfigFilePath = getConfigFilePath(os.homedir())
-  const onedriveConfigFilePath = getConfigFilePath(path.join(os.homedir(), 'OneDrive'))
   await writeFile(mainConfigFilePath, yaml.safeDump(config))
-  await copy(mainConfigFilePath, onedriveConfigFilePath)
 }
 
 async function readConfigFile(configFilePath, alternative) {

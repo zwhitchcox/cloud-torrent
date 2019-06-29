@@ -16,7 +16,7 @@ const app = express()
       const filePath = show.episodes[episodeNumber]
       const extension = path.extname(filePath)
       const episodePath = `/${webpath}/${episodeNumber.toLowerCase()}${extension}`
-      if (/rick/i.test(episodePath)) console.log(episodePath)
+      // if (/rick/i.test(episodePath)) console.log(episodePath)
       servePath(app, episodePath, filePath)
     }
   }
