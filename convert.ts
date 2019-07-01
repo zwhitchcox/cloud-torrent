@@ -3,28 +3,36 @@ import fs from 'fs'
 import ffmpeg from 'fluent-ffmpeg'
 import path from 'path'
 import rimraf from 'rimraf'
-import { getMainConfig, saveMainConfig } from './config';
-import { existsSync } from 'fs-extra';
+import { getMainConfig } from './config';
 import { getShowsInfo } from './info';
+import { existsSync } from 'fs-extra';
 const deleteAfter = true
-
-
-// TODO Batch Process
 
 let mainConfig
 
 ;(async () => {
   mainConfig = await getMainConfig()
   await deleteFile(__dirname + '/.tmp.mp4')
-  await setProcessingFiles(null)
   const {sources} = mainConfig
   const shows = await getShowsInfo(sources)
+  logLeft(shows)
   for (const show in shows) {
-    console.log('converting', show)
     const {episodes} = shows[show]
     await convertEpisodes(episodes)
   }
 })()
+
+function logLeft(shows) {
+  let episodeCount = 0
+  let total = 0
+  for (const show in shows) {
+    const { episodes } = shows[show]
+    const mkvs = Object.entries(episodes).filter(([episode, episodePath]) => /\.mkv$/.test(episodePath as string))
+    total += Object.entries(episodes).length
+    episodeCount += mkvs.length
+  }
+  console.log(`${episodeCount} left out of ${total} (${(total - episodeCount) / total * 100 | 0}%)`)
+}
 
 
 async function convertEpisodes(episodes) {
@@ -32,29 +40,21 @@ async function convertEpisodes(episodes) {
     const episode = episodes[episodeName]
     const input = episode
     if (/(mp4)$/.test(input)) continue
+    if (!/Rick and Morty.*S02E01.*.mkv$/.test(input)) continue
     const output = path.dirname(input) + "/" + path.basename(input).replace(/\.[a-z0-9]+$/, '.mp4')
     if (existsSync(output)) continue
     await convertFileInPlace(input, output)
     if (deleteAfter) {
-      console.log(chalk.red(`Deleting ${input}`))
+      console.log(chalk.green(`Deleting ${input}`))
       deleteFile(input)
     }
   }
 }
 
 
-async function setProcessingFiles(file) {
-  mainConfig.processing = file
-  await saveMainConfig(mainConfig)
-}
-
-
-
-
-
 function convertFileInPlace(input: string, output: string) {
   return new Promise((res, rej) => {
-    if (/.mp4$/.test(input)) {
+    if (/.mkv$/.test(input)) {
       console.log(chalk.yellow(`Processing ${path.basename(input)}`))
       const tmppath = __dirname + '/.tmp.mp4'
       const timeStart = +new Date
@@ -84,8 +84,8 @@ function convertFileInPlace(input: string, output: string) {
             const timeEnd = + new Date
             const milliseconds = timeEnd - timeStart
             const seconds = milliseconds / 1000
-            console.log(chalk.cyan(`Processing time ${seconds/60|0}:${padLeft(seconds % 60, 0, 2)}` ))
-            await deleteFile(tmppath)
+            console.log(chalk.green(`Processing time ${seconds/60|0}:${padLeft(seconds % 60, 0, 2)}` ))
+            // await deleteFile(tmppath)
             res()
           })
         })

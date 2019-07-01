@@ -41,7 +41,7 @@ import { queueEpisodes } from './queue-episodes';
   }
   const myip = getIP()
   const next5Episodes = episodes
-    .slice(currentIndex, currentIndex + 2)
+    .slice(currentIndex, currentIndex + 5)
     .map(tuple => tuple[0])
     .map(episode => `http://${myip}:5000/${showname.toLowerCase().replace(/ /ig, '-')}/${episode.toLowerCase()}.mp4`)
   console.log(next5Episodes)
