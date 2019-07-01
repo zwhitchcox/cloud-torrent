@@ -25,6 +25,7 @@ export async function queueEpisodes(addresses, time, onStatus) {
         }
     }))
     player.on('status', onStatus)
+    player.on('error', console.error)
     let statuscount = 0
     setInterval(() => {
       if(statuscount>5) {

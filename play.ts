@@ -47,6 +47,7 @@ getIP()
     .map(episode => `http://${myip}:5000/${showname.toLowerCase().replace(/ /ig, '-')}/${episode.toLowerCase()}.mp4`)
   console.log(next5Episodes)
   queueEpisodes(next5Episodes, lastplayed.time, async status => {
+    console.log(status)
     const contentId = _.get(status, 'media.contentId')
     let episodeId
     if (contentId) {
