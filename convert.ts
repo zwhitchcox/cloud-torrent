@@ -40,7 +40,6 @@ async function convertEpisodes(episodes) {
     const episode = episodes[episodeName]
     const input = episode
     if (/(mp4)$/.test(input)) continue
-    if (!/Rick and Morty.*S02E01.*.mkv$/.test(input)) continue
     const output = path.dirname(input) + "/" + path.basename(input).replace(/\.[a-z0-9]+$/, '.mp4')
     if (existsSync(output)) continue
     await convertFileInPlace(input, output)
