@@ -1,3 +1,4 @@
 node_modules
 _videos
 .tmp.mp4
+dist
