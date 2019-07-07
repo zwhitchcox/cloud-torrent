@@ -30,12 +30,30 @@ async function getShowInfo(showpath, showname) {
   }
 }
 
-async function getEpisodes(showpath) {
+const getEpisodesDragonBall = async showpath => {
   const episodePaths = (await getFileList(showpath) as string[])
-    .filter(filePath => (/S\d\dE\d\d/i.test(filePath) && !/\.srt$/.test(filePath)))
+    .filter(filePath => (/Episode \d+/i.test(filePath) && !/\.srt$/.test(filePath)))
+  
   const episodes = {}
   for (const episodePath of episodePaths) {
-    const matches = episodePath.match(/s\d\de\d\d/i)
+    const matches = episodePath.match(/Episode (\d+)/i)
+    if (matches) {
+      const episode = matches[1].padStart(3, "0")
+      const episodeID = "s00e" + episode
+      episodes[episodeID] = episodePath
+    }
+  }
+  return episodes
+}
+async function getEpisodes(showpath) {
+  if (/Dragon Ball$/.test(showpath)){
+    return await getEpisodesDragonBall(showpath)
+  }
+  const episodePaths = (await getFileList(showpath) as string[])
+    .filter(filePath => (/S\d+E\d+/i.test(filePath) && !/\.srt$/.test(filePath)))
+  const episodes = {}
+  for (const episodePath of episodePaths) {
+    const matches = episodePath.match(/s\d+e\d+/i)
     if (matches) {
       const episodeID = matches[0]
       episodes[episodeID] = episodePath

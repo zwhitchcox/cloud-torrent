@@ -45,23 +45,23 @@ getIP()
     currentIndex = 0
   }
   const myip = getIP()
-  const next5Episodes = episodes
-    .slice(currentIndex, currentIndex + 5)
+  const nextEpisodes = episodes
+    .slice(currentIndex, currentIndex + 10)
     .map(([episodeid, filepath]) => episodeid + path.extname(filepath as string))
     .map(episode => `http://${myip}:5000/${showname.toLowerCase().replace(/ /ig, '-')}/${episode.toLowerCase()}`)
-  console.log(next5Episodes)
+  console.log(nextEpisodes)
   let testEpisode, testTime;
   if (process.env.TEST) {
     testEpisode = [`http://${myip}:5000/test.mkv`]
     testTime = 0
     console.log('playing test')
   }
-  queueEpisodes(testEpisode || next5Episodes, testTime || lastplayed.time, async status => {
+  queueEpisodes(testEpisode || nextEpisodes, testTime || lastplayed.time, async status => {
     console.log(status)
     const contentId = _.get(status, 'media.contentId')
     let episodeId
     if (contentId) {
-      const match = contentId.match(/s\d\de\d\d/i)
+      const match = contentId.match(/s\d\de\d+/i)
       episodeId = match && match[0]
     }
     if (status && status.currentTime && episodeId) {

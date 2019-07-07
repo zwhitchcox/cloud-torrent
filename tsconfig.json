@@ -15,11 +15,12 @@
     "lib": [
       "dom",
       "dom.iterable",
-      "esnext",
-    ],
+      "esnext"
+    ]
   },
   "files": [
     "convert",
+    "play.ts"
   ],
   "include": [
     "**/*.test.ts"
