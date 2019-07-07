@@ -1,8 +1,13 @@
 import * as util from 'util'
+import path from 'path'
 import { Client, DefaultMediaReceiver } from 'castv2-client'
 import * as  ChromecastAPI from 'chromecast-api'
 
 
+const extensionMimeMap = {
+  '.mp4': 'video/mp4',
+  '.mkv': 'video/x-matroska',
+}
 let chromecastIP;
 export async function queueEpisodes(addresses, time, onStatus) {
   if (!chromecastIP)
@@ -20,11 +25,12 @@ export async function queueEpisodes(addresses, time, onStatus) {
         playbackDuration: 2,
         media: {
           contentId: address,
-          contentType: "video/mp4",
+          contentType: extensionMimeMap[path.extname(address)],
           streamType: 'BUFFERED'
         }
     }))
     player.on('status', onStatus)
+    player.on('error', console.error)
     let statuscount = 0
     setInterval(() => {
       if(statuscount>5) {

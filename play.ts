@@ -1,4 +1,5 @@
 import os from 'os'
+import path from 'path'
 import _ from 'lodash'
 import { getMainConfig, saveMainConfig } from "./config";
 import { getShowsInfo } from "./info";
@@ -6,10 +7,11 @@ import { queueEpisodes } from './queue-episodes';
 getIP()
 
 
+
 ;(async () => {
   const config = await getMainConfig()
   const shows = await getShowsInfo(config.sources)
-  const showToPlay = process.argv.slice(2)[0] || config.lastShowPlayed
+  const showToPlay = process.argv.slice(2)[0] || config.lastShowPlayed || 'the-office'
   if (!showToPlay) throw new Error('I need to know which show to play')
   config.lastShowPlayed = showToPlay
   await saveMainConfig(config)
@@ -34,7 +36,9 @@ getIP()
     .sort((a, b) => {
       return a[0] > b[0] ? 1 : -1
     })
+  console.log(lastplayed)
   let currentIndex = episodes.findIndex(episode => {
+    //console.log(episode[0].toLowerCase())
     return episode[0].toLowerCase() === lastplayed.episode
   })
   if (currentIndex < 1) {
@@ -43,10 +47,17 @@ getIP()
   const myip = getIP()
   const next5Episodes = episodes
     .slice(currentIndex, currentIndex + 5)
-    .map(tuple => tuple[0])
-    .map(episode => `http://${myip}:5000/${showname.toLowerCase().replace(/ /ig, '-')}/${episode.toLowerCase()}.mp4`)
+    .map(([episodeid, filepath]) => episodeid + path.extname(filepath as string))
+    .map(episode => `http://${myip}:5000/${showname.toLowerCase().replace(/ /ig, '-')}/${episode.toLowerCase()}`)
   console.log(next5Episodes)
-  queueEpisodes(next5Episodes, lastplayed.time, async status => {
+  let testEpisode, testTime;
+  if (process.env.TEST) {
+    testEpisode = [`http://${myip}:5000/test.mkv`]
+    testTime = 0
+    console.log('playing test')
+  }
+  queueEpisodes(testEpisode || next5Episodes, testTime || lastplayed.time, async status => {
+    console.log(status)
     const contentId = _.get(status, 'media.contentId')
     let episodeId
     if (contentId) {
